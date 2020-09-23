@@ -52,7 +52,7 @@ void init_utils(const modules &m, utils &u);
 
 int main(int argc, char** argv)
 {
-	
+
 	params p;  init_params (p   ); // create and initialize the parameters defined by the user
 	modules m; init_modules(p, m); // create and initialize the modules
 	buffers b; init_buffers(p, b); // create and initialize the buffers required by the modules
@@ -64,32 +64,32 @@ int main(int argc, char** argv)
 	// Compute the noise (sigma)
 	float SNR_max  =  10.01f;
     const auto esn0  = tools::ebn0_to_esn0 (SNR_max, p.R);
-    const auto sigma = tools::esn0_to_sigma(esn0;
+    const auto sigma = tools::esn0_to_sigma(esn0);
     u.noise->set_noise(sigma, SNR_max, esn0);
 
 	// Set the noise for the Frozen Bits Generator GA
 	frozenBitsGeneratorGA.set_noise(*u.noise);
-	
+
 	// Generate the frozen bits
-	frozenBitsGeneratorGA.generate(myB.frozen_bits);
+	frozenBitsGeneratorGA.generate(b.frozen_bits);
 
 	// Create Polar Encoder
 	module::Encoder_polar<> polarEncoder(p.K, p.N, b.frozen_bits);
 
 	// Generate Random bits
-	b.source ->generate(b.ref_bits;
-	
+	m.source ->generate(b.ref_bits);
+
 	// Encode the bits
 	polarEncoder.encode(b.ref_bits,b.enc_bits);
 
 	// Create Polar Decoder
-	module::Decoder_polar_SC_naive<> polarDecoder(p.K, p.N, myB.frozen_bits);
-	
+	module::Decoder_polar_SC_naive<> polarDecoder(p.K, p.N, b.frozen_bits);
+
 	// Convert the vector<int> to vector<float> such that it can be used in the decoder
-	std::vector<float> encodedBits(myB.enc_bits.begin(), myB.enc_bits.end());
+	std::vector<float> encodedBits(b.enc_bits.begin(), b.enc_bits.end());
 
 	// Decode the encoded bits
-	polarDecoder.decode_siho(encodedBits,myB.dec_bits);
+	polarDecoder.decode_siho(encodedBits,b.dec_bits);
 
 	return 0;
 }
